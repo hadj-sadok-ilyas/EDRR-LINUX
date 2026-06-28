@@ -1,7 +1,7 @@
 #include <iostream>
 #include <stdio.h>
 #include <unistd.h>
-//#include <sys/inotify.h>
+#include <sys/inotify.h>
 using namespace std;
 
 string DetectOS() {
