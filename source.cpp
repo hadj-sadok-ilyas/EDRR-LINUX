@@ -1,118 +1,57 @@
 #include <iostream>
 #include <stdio.h>
 #include <unistd.h>
-#include <windows.h>
+//#include <sys/inotify.h>
 using namespace std;
 
 string DetectOS() {
 #if defined(_WIN64) || defined(_WIN32)
-    return "Windows";
+    return "windows";
 
 # elif  defined(__linux__)
-    return "Linux";
+    return "linux";
 
 #endif
 }
 
-void WindowsFIM() {
-    cout << "what file would you like to monitor? Filename:" << endl;
-    wstring dir;
-    wcin >> dir;
-    LPCWSTR dir2 = dir.c_str();
-    HANDLE hDir = CreateFileW(
-        dir2,
-        FILE_LIST_DIRECTORY,
-        FILE_SHARE_READ |
-        FILE_SHARE_WRITE |
-        FILE_SHARE_DELETE,
-        NULL,
-        OPEN_EXISTING,
-        FILE_FLAG_BACKUP_SEMANTICS,
-        NULL
-    );
+void LinuxFIM(string file) {
+#define BUF_LEN (1024 * (sizeof(struct inotify_event) + 16))
+    int fd = inotify_init();
+    if (fd < 0) { perror("inotify_init"); exit(1); }
 
-    if (hDir == INVALID_HANDLE_VALUE)
-    {
-        printf("Failed to open directory. Error: %lu\n",
-               GetLastError());
-    }
+    int wd = inotify_add_watch(fd, file.c_str(), IN_MODIFY | IN_DELETE);
+    if (wd < 0) { perror("inotify_add_watch"); exit(1); }
 
-    BYTE buffer[4096];
-    DWORD bytesReturned;
+    char buffer[BUF_LEN];
 
-    printf("Watching the directory\n");
+    while (1) {
+        int length = read(fd, buffer, BUF_LEN);
 
-    while (1)
-    {
-        BOOL success = ReadDirectoryChangesW(
-            hDir,
-            buffer,
-            sizeof(buffer),
-            FALSE, // TRUE = include subfolders
-            FILE_NOTIFY_CHANGE_FILE_NAME |
-            FILE_NOTIFY_CHANGE_DIR_NAME |
-            FILE_NOTIFY_CHANGE_LAST_WRITE |
-            FILE_NOTIFY_CHANGE_SIZE,
-            &bytesReturned,
-            NULL,
-            NULL
-        );
-
-        if (!success)
-        {
-            printf("ReadDirectoryChangesW failed. Error: %lu\n",
-                   GetLastError());
-            break;
+        if (length < 0) {
+            perror("read");
+            exit(1);
         }
 
-        FILE_NOTIFY_INFORMATION* info =
-            (FILE_NOTIFY_INFORMATION*)buffer;
+        int i = 0;
+        string action;
+        while (i < length) {
+            struct inotify_event *event =
+                (struct inotify_event *) &buffer[i];
+            if      (event->mask & IN_MODIFY) action = "modified";
+            else if (event->mask & IN_DELETE) action = "deleted";
+            else                              action = "other";
 
-        while (1)
-        {
-            const wchar_t* action = L"UNKNOWN";
+            if (event->len)
+                printf("Event received: [%s] %s\n", action.c_str(), event->name);
+            else
+                printf("Event received: [%s]\n", action.c_str());
 
-            switch (info->Action)
-            {
-            case FILE_ACTION_ADDED:
-                action = L"CREATED";
-                break;
-
-            case FILE_ACTION_REMOVED:
-                action = L"DELETED";
-                break;
-
-            case FILE_ACTION_MODIFIED:
-                action = L"MODIFIED";
-                break;
-
-            case FILE_ACTION_RENAMED_OLD_NAME:
-                action = L"RENAMED FROM";
-                break;
-
-            case FILE_ACTION_RENAMED_NEW_NAME:
-                action = L"RENAMED TO";
-                break;
-            }
-
-            wprintf(
-            L"[%ls] %.*ls\n",
-                action,
-                info->FileNameLength / sizeof(WCHAR),
-                info->FileName
-            );
-
-            if (info->NextEntryOffset == 0)
-                break;
-
-            info = (FILE_NOTIFY_INFORMATION*)
-                ((BYTE*)info + info->NextEntryOffset);
+            i += sizeof(struct inotify_event) + event->len;
+            cout << "i=" << i << endl;
         }
     }
 
-    CloseHandle(hDir);
 }
-
 
 
 
