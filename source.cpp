@@ -6,10 +6,10 @@ using namespace std;
 
 string DetectOS() {
 #if defined(_WIN64) || defined(_WIN32)
-    return "windows";
+    return "Windows";
 
 # elif  defined(__linux__)
-    return "linux";
+    return "Linux";
 
 #endif
 }

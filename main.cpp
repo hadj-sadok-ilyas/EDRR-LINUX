@@ -17,7 +17,7 @@ if (DetectOS()!="linux") {
     string filename;
     cin >> choice;
     if (choice == "1") {
-        cout << "what file would you like to monitor? Filename:" << endl;
+        cout << "what file would you like to monitor? Filename: " << endl;
         cin >> filename;
         LinuxFIM(filename);
     }
