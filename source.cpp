@@ -14,7 +14,7 @@ string DetectOS() {
 #endif
 }
 
-void LinuxFIM(string file) {/*
+void LinuxFIM(string file) {
 #define BUF_LEN (1024 * (sizeof(struct inotify_event) + 16))
     int fd = inotify_init();
     if (fd < 0) { perror("inotify_init"); exit(1); }
@@ -50,8 +50,7 @@ void LinuxFIM(string file) {/*
             cout << "i=" << i << endl;
         }
     }
-*/
-    cout << "Filename::::"<< file << endl;
+
 }
 
 
