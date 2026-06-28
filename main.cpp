@@ -7,9 +7,9 @@ using namespace std;
 
 int main()
 {
-if (DetectOS()!="linux") {
-    cout << "Unsupported OS detected, this function is for linux only" << endl;
-}
+    if (DetectOS()!="linux") {
+        cout << "Unsupported OS detected, this function is for linux only" << endl;
+    }
     cout << "Choose your function:\n"
             "   1-FIM\n"
             "   2-FUTURE functions... to be added later\n" << endl;
@@ -17,9 +17,7 @@ if (DetectOS()!="linux") {
     string filename;
     cin >> choice;
     if (choice == "1") {
-        cout << "what file would you like to monitor? Filename:" << endl;
-        cin >> filename;
-        LinuxFIM(filename);
+        WindowsFIM();
     }
     return 0;
 }

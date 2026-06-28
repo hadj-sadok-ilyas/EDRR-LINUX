@@ -2,7 +2,7 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
-      <module fileurl="file://$PROJECT_DIR$/.idea/EDRR-linux.iml" filepath="$PROJECT_DIR$/.idea/EDRR-linux.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/EDRR-windows.iml" filepath="$PROJECT_DIR$/.idea/EDRR-windows.iml" />
     </modules>
   </component>
 </project>
